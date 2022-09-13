@@ -1,0 +1,78 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn import metrics
+from sklearn.linear_model import LinearRegression
+from sklearn.linear_model import LogisticRegression
+
+import pandas as pd
+df = pd.read_csv("https://raw.githubusercontent.com/ramkiramanathan/KNN/main/Titanic_Dataset")
+
+df.shape
+
+df.dtypes
+
+df = df.drop('Name',axis = 1)
+df = df.drop('Ticket',axis = 1)
+df = df.drop('Cabin',axis = 1)
+
+df['Family'] = df['SibSp'] + df['Parch'] + 1
+
+df = df.drop('SibSp',axis = 1)
+df = df.drop('Parch',axis = 1)
+
+df.describe()
+
+df.Family.sum()
+
+df.isnull().sum()
+
+2.Cleaning the Data
+
+df['Age'] = df['Age'].fillna(df.Age.mean())
+
+df['Age'].isnull().sum()
+
+df['Embarked'].isnull().sum()
+
+df['Embarked'].value_counts()
+
+df['Embarked'] = df['Embarked'].fillna(df.Embarked.mode()[0])
+
+df['Embarked'].value_counts()
+
+df.Embarked.replace(['S','C','Q'],[1,2,3],inplace = True)
+
+df.Sex.unique()
+
+df.Sex.replace(['male', 'female'],[0,1],inplace = True)
+
+X = df.loc[:,['PassengerId','Pclass', 'Sex', 'Age', 'Fare', 'Embarked',
+       'Family']].values
+Y = df.loc[:,'Survived']
+X_train,X_test,Y_train,Y_test = train_test_split(X,Y,test_size=0.2)
+
+## Scalling
+scaler = StandardScaler()
+scaler.fit(X_train)
+X_train_scaled = scaler.transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+from sklearn.neighbors import KNeighborsClassifier
+
+res = []
+for i in range(1,30,2):
+#Train Model and Predict  
+  n_neighbors = KNeighborsClassifier(n_neighbors = i)
+  model = n_neighbors.fit(X_train_scaled,Y_train)
+  model
+  Y_pred = n_neighbors.predict(X_test_scaled)
+  print("Test set Accuracy for k = {}: ".format(i), (metrics.accuracy_score(Y_test, Y_pred))*100)
+  res.append((metrics.accuracy_score(Y_test, Y_pred))*100)
+
+res2 = [i for i in range(1,30,2)]
+
+plt.plot(res2,res)
+
